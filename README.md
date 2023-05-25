@@ -23,6 +23,10 @@ Informações do robô:
 - A leitura do sensor é atualizada a partir da leitura do tópico /base_scan.
 ______
 
+### Vídeo
+
+- https://youtu.be/p28xozwo3kQ
+
 ### Como rodar
 
 1. Crie um workspace com o diretório src:
