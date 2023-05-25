@@ -24,8 +24,6 @@ class StageController():
         self.robot_position = np.zeros(3)
         self.target_position = np.array(target_position)
 
-        self.linear_velocity = 0.1
-        self.angular_velocity = 0.5
         self.kp_linear = 0.2
         self.kp_angular = 1.0
         self.min_distance = 0.5
