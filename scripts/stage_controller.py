@@ -23,12 +23,13 @@ class StageController():
 		self.angular_velocity = 0.5  							
 		self.kp_linear = 0.2  									
 		self.kp_angular = 1.0  									
-		self.min_distance = 0.5  								
+		self.min_distance = 0.5  						
 
 	def laser_scan_callback(self, msg):
 		""" Callback function for laser scan """
 		self.scan = np.array(msg.ranges)
 		self.move_to_target()
+
 
 	def odometry_callback(self, msg):
 		""" Callback function for odometry """
@@ -36,26 +37,44 @@ class StageController():
 		self.robot_position[1] = msg.pose.pose.position.y
 		self.robot_position[2] = 2 * np.arcsin(msg.pose.pose.orientation.z)
 
+
 	def move_to_target(self):
 		""" Move to target position """
 		direction = self.target_position - self.robot_position[:2]
 		distance = np.linalg.norm(direction)
-
+		
 		if distance <= 0.1:
-			rospy.loginfo("The robot has reached the target!")
+			rospy.loginfo("Target alcançado!!")
 			self.stop_robot()
 		else:
 			direction /= distance
 
 			target_angle = np.arctan2(direction[1], direction[0])
 			current_angle = self.robot_position[2]
-
 			angle_diff = target_angle - current_angle
 			angle_diff = np.arctan2(np.sin(angle_diff), np.cos(angle_diff))
-
 			linear_vel = self.kp_linear * distance
 			angular_vel = self.kp_angular * angle_diff
-			self.publish_cmd(linear_vel, angular_vel)
+			self.publish_cmd(linear_vel, angular_vel)	
+			rospy.loginfo("Navegando...")
+
+			if (len(self.scan) > 0):
+				if (min(self.scan[45*4:225*4]) < 0.3):
+					linear_vel = 0
+					angular_vel = 5
+					self.publish_cmd(linear_vel, angular_vel)	
+					rospy.loginfo("Desviando de um obstáculo...")
+				else:
+					direction /= distance
+
+					target_angle = np.arctan2(direction[1], direction[0])
+					current_angle = self.robot_position[2]
+					angle_diff = target_angle - current_angle
+					angle_diff = np.arctan2(np.sin(angle_diff), np.cos(angle_diff))
+					linear_vel = self.kp_linear * distance
+					angular_vel = self.kp_angular * angle_diff
+					self.publish_cmd(linear_vel, angular_vel)	
+					rospy.loginfo("Navegando...")
 	
 	def publish_cmd(self, linear_vel, angular_vel):
 		""" Publish Twist command """
